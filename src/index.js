@@ -12,13 +12,12 @@ const config = {
     }
   },
   scene: {
-    preload: preload,
-    create: create
+    preload,
+    create
   }
 };
 
-new Phaser.Game(config);
-
+//loading assets (images,musics,animations)
 function preload () {
   this.load.image('sky', 'assets/sky.png');
 }
@@ -26,3 +25,5 @@ function preload () {
 function create () {
   this.add.image(400, 300, 'sky');
 }
+
+new Phaser.Game(config);
