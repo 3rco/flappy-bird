@@ -1,4 +1,3 @@
-
 import Phaser from "phaser";
 
 const config = {
@@ -6,24 +5,33 @@ const config = {
   width: 800,
   height: 600,
   physics: {
-    default: 'arcade',
+    default: "arcade",
     arcade: {
-      gravity: { y: 200 }
-    }
+      /* gravity: {
+        y: 200,
+      }, */
+    },
   },
   scene: {
     preload,
-    create
-  }
+    create,
+    update,
+  },
 };
 
-//loading assets (images,musics,animations)
-function preload () {
-  this.load.image('sky', 'assets/sky.png');
+function preload() {
+  this.load.image("sky", "assets/sky.png");
+  this.load.image("birdy", "assets/bird.png");
 }
 
-function create () {
-  this.add.image(400, 300, 'sky');
+let bird = null;
+
+function create() {
+  this.add.image(0, 0, "sky").setOrigin(0, 0);
+  bird = this.physics.add.sprite(80, 300, "birdy");
 }
+let totalDelta = null;
+
+function update(time, delta) {}
 
 new Phaser.Game(config);
