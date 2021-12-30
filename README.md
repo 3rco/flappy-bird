@@ -1,1 +1,1 @@
-flappy-birdd
+flappy-bird
