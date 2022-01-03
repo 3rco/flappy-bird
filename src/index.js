@@ -1,7 +1,19 @@
 import Phaser from "phaser";
+import PlayScene from "./scenes/PlayScene";
+
+const WIDTH = 800;
+const HEIGHT = 600;
+const BIRD_POSITION = { x: WIDTH / 10, y: HEIGHT / 2 };
+
+const SHARED_CONFIG = {
+  width: WIDTH,
+  height: HEIGHT,
+  startPosition: BIRD_POSITION,
+};
 
 const config = {
   type: Phaser.AUTO,
+  ...SHARED_CONFIG,
   width: 800,
   height: 600,
   physics: {
@@ -13,22 +25,17 @@ const config = {
       }, */
     },
   },
-  scene: {
-    preload,
-    create,
-    update,
-  },
+  scene: [new PlayScene(SHARED_CONFIG)],
 };
 
 const initialBirdPosition = { x: config.width * 0.1, y: config.height / 2 };
-const GRAVITY = 500;
+
 const VELOCITY = 300;
 const PIPES_TO_RENDER = 5;
 let bird = null;
 let pipes = null;
 
-let pipeHorizontalDistance = 0;
-const pipeVerticalDistanceRange = [150, 250];
+const pipeVerticalDistanceRange = [150, 200];
 const pipeHorizontalDistanceRange = [450, 500];
 
 function preload() {
@@ -44,7 +51,7 @@ function create() {
     initialBirdPosition.y,
     "birdy"
   );
-
+  bird.body.gravity.y = 500;
   pipes = this.physics.add.group();
 
   for (let i = 0; i < PIPES_TO_RENDER; i++) {
@@ -55,8 +62,6 @@ function create() {
   }
 
   pipes.setVelocityX(-200);
-
-  bird.body.gravity.y = GRAVITY;
 
   this.input.on("pointerdown", flap);
 
