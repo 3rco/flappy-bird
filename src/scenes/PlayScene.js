@@ -1,10 +1,10 @@
-import Phaser from "phaser";
+import BaseScene from "./BaseScene";
 
 const PIPES_TO_RENDER = 5;
-class PlayScene extends Phaser.Scene {
+class PlayScene extends BaseScene {
   constructor(config) {
-    super("PlayScene");
-    this.config = config;
+    super("PlayScene", config);
+
     this.initialBirdPosition = {
       x: 80,
       y: 300,
@@ -20,28 +20,19 @@ class PlayScene extends Phaser.Scene {
     this.scoreText = "";
   }
 
-  preload() {
-    this.load.image("sky", "assets/sky.png");
-    this.load.image("birdy", "assets/bird.png");
-    this.load.image("pipe", "assets/pipe.png");
-  }
-
   create() {
-    this.createBackground();
+    super.create();
     this.createBird();
     this.createPipes();
     this.createColliders();
     this.createScore();
+    this.createPause();
     this.handleInputs();
   }
 
   update() {
     this.checkGameStatus();
     this.recyclePipes();
-  }
-
-  createBackground() {
-    this.add.image(0, 0, "sky").setOrigin(0, 0);
   }
 
   createBird() {
@@ -79,9 +70,27 @@ class PlayScene extends Phaser.Scene {
 
   createScore() {
     this.score = 0;
+    const bestScore = localStorage.getItem("bestScore");
     this.scoreText = this.add.text(16, 16, `Score: ${0}`, {
       fontSize: "32px",
       fill: "#000",
+    });
+    this.bestScore = this.add.text(16, 52, `Best Score: ${bestScore || 0}`, {
+      fontSize: "18px",
+      fill: "#000",
+    });
+  }
+
+  createPause() {
+    const pauseButton = this.add
+      .image(this.config.width - 10, this.config.height - 10, "pause")
+      .setInteractive()
+      .setScale(3)
+      .setOrigin(1);
+
+    pauseButton.on("pointerdown", () => {
+      this.physics.pause();
+      this.scene.pause();
     });
   }
 
@@ -126,6 +135,7 @@ class PlayScene extends Phaser.Scene {
         if (tempPipes.length === 2) {
           this.placePipe(...tempPipes);
           this.increaseScore();
+          this.saveBestScore();
         }
       }
     });
@@ -141,10 +151,19 @@ class PlayScene extends Phaser.Scene {
     return rigthMostX;
   }
 
+  saveBestScore() {
+    const bestScoreText = localStorage.getItem("bestScore");
+    const bestScore = bestScoreText && parseInt(bestScoreText, 10);
+
+    if (!bestScore || this.score > bestScore) {
+      localStorage.setItem("bestScore", this.score);
+    }
+  }
+
   gameOver() {
     this.physics.pause();
     this.bird.setTint(0xee4824);
-
+    this.saveBestScore();
     this.time.addEvent({
       delay: 1000,
       callback: () => {
