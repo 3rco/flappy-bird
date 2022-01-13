@@ -11,16 +11,33 @@ class PlayScene extends BaseScene {
     };
     this.bird = null;
     this.pipes = null;
+    this.isPaused = false;
     this.flapVelocity = 300;
     this.pipeHorizontalDistance = 0;
-    this.pipeVerticalDistanceRange = [150, 200];
-    this.pipeHorizontalDistanceRange = [450, 500];
 
     this.score = 0;
     this.scoreText = "";
+
+    this.currentDifficulty = "easy";
+
+    this.difficulties = {
+      easy: {
+        pipeVerticalDistanceRange: [150, 190],
+        pipeHorizontalDistanceRange: [450, 500],
+      },
+      normal: {
+        pipeVerticalDistanceRange: [125, 165],
+        pipeHorizontalDistanceRange: [400, 450],
+      },
+      hard: {
+        pipeVerticalDistanceRange: [100, 130],
+        pipeHorizontalDistanceRange: [300, 400],
+      },
+    };
   }
 
   create() {
+    this.currentDifficulty = "easy";
     super.create();
     this.createBird();
     this.createPipes();
@@ -28,6 +45,16 @@ class PlayScene extends BaseScene {
     this.createScore();
     this.createPause();
     this.handleInputs();
+    this.listenEvents();
+
+    this.anims.create({
+      key: "fly",
+      frames: this.anims.generateFrameNumbers("birdy", { start: 8, end: 15 }),
+      frameRate: 8,
+      repeat: -1,
+    });
+
+    this.bird.play("fly");
   }
 
   update() {
@@ -35,12 +62,48 @@ class PlayScene extends BaseScene {
     this.recyclePipes();
   }
 
+  listenEvents() {
+    if (this.pauseEvent) {
+      return;
+    }
+
+    this.pauseEvent = this.events.on("resume", () => {
+      this.initialTime = 3;
+      this.countDownText = this.add
+        .text(...this.screenCenter, this.initialTime, {
+          fontSize: "50px",
+          fill: "#FFF",
+        })
+        .setOrigin(0.5);
+
+      this.timedEvent = this.time.addEvent({
+        delay: 1000,
+        callback: this.countDown,
+        callbackScope: this,
+        loop: true,
+      });
+    });
+  }
+
+  countDown() {
+    this.initialTime--;
+    this.countDownText.setText(this.initialTime);
+    if (this.initialTime <= 0) {
+      this.isPaused = false;
+      this.countDownText.setText("");
+      this.physics.resume();
+      this.timedEvent.remove();
+    }
+  }
+
   createBird() {
-    this.bird = this.physics.add.sprite(
-      this.config.startPosition.x,
-      this.config.startPosition.y,
-      "birdy"
-    );
+    this.bird = this.physics.add
+      .sprite(this.config.startPosition.x, this.config.startPosition.y, "birdy")
+      .setFlipX(true)
+      .setScale(3);
+
+    this.bird.setBodySize(this.bird.width, this.bird.height - 8);
+
     this.bird.body.gravity.y = 600;
     this.bird.setCollideWorldBounds(true);
   }
@@ -82,6 +145,7 @@ class PlayScene extends BaseScene {
   }
 
   createPause() {
+    this.isPaused = false;
     const pauseButton = this.add
       .image(this.config.width - 10, this.config.height - 10, "pause")
       .setInteractive()
@@ -89,6 +153,7 @@ class PlayScene extends BaseScene {
       .setOrigin(1);
 
     pauseButton.on("pointerdown", () => {
+      this.isPaused = true;
       this.physics.pause();
       this.scene.pause();
       this.scene.launch("PauseScene");
@@ -101,9 +166,10 @@ class PlayScene extends BaseScene {
     this.input.keyboard.on("keydown_SPACE", this.flap, this);
   }
   placePipe(uPipe, lPipe) {
+    const difficulty = this.difficulties[this.currentDifficulty];
     const rigthMostX = this.getRightMostPipe();
     const pipeVerticalDistance = Phaser.Math.Between(
-      ...this.pipeVerticalDistanceRange
+      ...difficulty.pipeVerticalDistanceRange
     );
     const pipeVerticalPosition = Phaser.Math.Between(
       0 + 20,
@@ -111,7 +177,7 @@ class PlayScene extends BaseScene {
     );
 
     const pipeHorizontalDistance = Phaser.Math.Between(
-      ...this.pipeHorizontalDistanceRange
+      ...difficulty.pipeHorizontalDistanceRange
     );
 
     uPipe.x = rigthMostX + pipeHorizontalDistance;
@@ -137,9 +203,19 @@ class PlayScene extends BaseScene {
           this.placePipe(...tempPipes);
           this.increaseScore();
           this.saveBestScore();
+          this.changeDifficulty();
         }
       }
     });
+  }
+
+  changeDifficulty() {
+    if (this.score === 5) {
+      this.currentDifficulty = "normal";
+    }
+    if (this.score === 10) {
+      this.currentDifficulty = "hard";
+    }
   }
 
   getRightMostPipe() {
@@ -175,6 +251,9 @@ class PlayScene extends BaseScene {
   }
 
   flap() {
+    if (this.isPaused) {
+      return;
+    }
     this.bird.body.velocity.y = -this.flapVelocity;
   }
 
