@@ -113,7 +113,7 @@ class PlayScene extends BaseScene {
 
     for (let i = 0; i < PIPES_TO_RENDER; i++) {
       const upperPipe = this.pipes
-        .create(0, 0, "pipe")
+        .create(800, 0, "pipe")
         .setImmovable(true)
         .setOrigin(0, 1);
       const lowerPipe = this.pipes
@@ -123,7 +123,6 @@ class PlayScene extends BaseScene {
 
       this.placePipe(upperPipe, lowerPipe);
     }
-
     this.pipes.setVelocityX(-200);
   }
 
@@ -151,7 +150,12 @@ class PlayScene extends BaseScene {
       .setInteractive()
       .setScale(3)
       .setOrigin(1);
-
+    this.input.keyboard.on("keydown_P ", () => {
+      this.isPaused = true;
+      this.physics.pause();
+      this.scene.pause();
+      this.scene.launch("PauseScene");
+    });
     pauseButton.on("pointerdown", () => {
       this.isPaused = true;
       this.physics.pause();

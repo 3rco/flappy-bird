@@ -32,7 +32,7 @@ class BaseScene extends Phaser.Scene {
     menu.forEach((menuItem) => {
       const menuPosition = [
         this.screenCenter[0],
-        this.screenCenter[1] + lastMenuPositionY,
+        this.screenCenter[1] - 50 + lastMenuPositionY,
       ];
       menuItem.textGO = this.add
         .text(...menuPosition, menuItem.text, this.fontOptions)
