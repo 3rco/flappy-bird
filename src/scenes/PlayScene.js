@@ -113,7 +113,8 @@ class PlayScene extends BaseScene {
 
     for (let i = 0; i < PIPES_TO_RENDER; i++) {
       const upperPipe = this.pipes
-        .create(800, 0, "pipe")
+        .create(800, 0, "pipe2")
+        .setFlipY(true)
         .setImmovable(true)
         .setOrigin(0, 1);
       const lowerPipe = this.pipes
@@ -248,7 +249,7 @@ class PlayScene extends BaseScene {
     this.time.addEvent({
       delay: 1000,
       callback: () => {
-        this.scene.restart();
+        this.scene.start("MenuScene");
       },
       loop: false,
     });

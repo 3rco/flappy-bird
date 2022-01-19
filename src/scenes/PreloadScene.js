@@ -15,6 +15,7 @@ class PreloadScene extends Phaser.Scene {
       frameHeight: 16,
     });
     this.load.image("pipe", "pipe.png");
+    this.load.image("pipe2", "pipe2.png");
     this.load.image("pause", "pause.png");
     this.load.image("back", "back.png");
   }
