@@ -48,6 +48,7 @@ class MenuScene extends BaseScene {
       menuItem.scene && this.scene.start(menuItem.scene);
 
       if (menuItem.text === "Exit") {
+        location.href = "https://ercanunal.dev/";
         this.game.destroy(true);
       }
     });
